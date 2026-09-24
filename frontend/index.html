@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fa">
+  <title>AI Lead Qualification Agent</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/script.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="AI Lead Qualification Agent home">
+        <span class="brand-mark" aria-hidden="true">L</span>
+        <span class="brand-copy">
+          <strong>AI Lead Qualification Agent</strong>
+          <span>MCP-powered sales assistant</span>
+        </span>
+      </a>
+      <div class="header-actions">
+        <span class="online"><span class="online-dot"></span>Agent Online</span>
+        <button class="button button-secondary new-conversation" id="newConversation" type="button" disabled>
+          <span aria-hidden="true">＋</span> New Conversation
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="chat-panel panel" aria-label="Conversation with the agent">
+        <div class="chat-heading">
+          <div>
+            <h1>AI Lead Qualification Agent</h1>
+            <p class="heading-note">MCP-powered conversational lead qualification</p>
+          </div>
+          <div class="session-chip" id="sessionChip" hidden aria-hidden="true"></div>
+        </div>
+
+        <div class="chat-scroll" id="chatScroll" aria-live="polite" aria-relevant="additions text">
+          <div class="lead-form-card" id="leadFormCard">
+            <div class="form-heading">
+              <span class="step-number">01</span>
+              <div>
+                <h2>First, a few details</h2>
+                <p>So the agent can tailor the conversation to your business.</p>
+              </div>
+            </div>
+            <form id="leadForm" novalidate>
+              <div class="form-grid">
+                <label class="field">
+                  <span>Name</span>
+                  <input id="nameInput" name="name" type="text" autocomplete="name" placeholder="e.g. Rahul Sharma" required maxlength="120">
+                </label>
+                <label class="field">
+                  <span>Email</span>
+                  <input id="emailInput" name="email" type="email" autocomplete="email" placeholder="you@company.com" required maxlength="254">
+                </label>
+                <label class="field field-full">
+                  <span>Company</span>
+                  <input id="companyInput" name="company" type="text" autocomplete="organization" placeholder="Your company name" required maxlength="160">
+                </label>
+              </div>
+              <p class="form-error" id="formError" role="alert" hidden>Please enter your name, a valid email, and company.</p>
+              <button class="button button-primary start-button" type="submit">Start conversation <span aria-hidden="true">→</span></button>
+              <p class="privacy-note"><span aria-hidden="true">▣</span> Your information is used to qualify this request.</p>
+            </form>
+          </div>
+
+          <div class="empty-state" id="emptyState" hidden>
+            <div class="empty-icon" aria-hidden="true"><span>✳</span></div>
+            <h2>Start a conversation</h2>
+            <p>Tell the agent about your business needs. It will qualify your requirement, search available solutions, and create follow-ups when needed.</p>
+            <div class="prompt-list" aria-label="Example messages">
+              <button class="prompt-button" type="button" data-prompt="We need CRM for a 20-person team">We need CRM for a 20-person team <span>↗</span></button>
+              <button class="prompt-button" type="button" data-prompt="We currently use Excel and want to automate sales follow-ups">We currently use Excel <span>↗</span></button>
+              <button class="prompt-button" type="button" data-prompt="I want someone to contact me tomorrow">I want someone to contact me tomorrow <span>↗</span></button>
+            </div>
+          </div>
+
+          <div class="messages" id="messages" aria-label="Messages"></div>
+        </div>
+
+        <div class="composer-wrap">
+          <div class="thinking" id="thinking" role="status" aria-live="polite" hidden>
+            <span class="thinking-dots"><i></i><i></i><i></i></span>
+            <span>Agent is thinking...</span>
+          </div>
+          <form class="composer" id="messageForm">
+            <label class="sr-only" for="messageInput">Describe your requirement</label>
+            <textarea id="messageInput" rows="1" placeholder="Describe your requirement..." disabled></textarea>
+            <button class="send-button" id="sendButton" type="submit" aria-label="Send message" disabled>
+              <span>Send</span><span aria-hidden="true">↑</span>
+            </button>
+          </form>
+          <p class="composer-hint">Press <kbd>Enter</kbd> to send <span>·</span> <kbd>Shift + Enter</kbd> for a new line</p>
+        </div>
+      </section>
+
+      <aside class="sidebar" aria-label="Lead and agent details">
+        <section class="side-card panel">
+          <div class="card-heading">
+            <span class="card-icon lead-icon" aria-hidden="true">◎</span>
+            <div><h2>Lead Details</h2></div>
+          </div>
+          <dl class="detail-list">
+            <div><dt>Name</dt><dd id="detailName">—</dd></div>
+            <div><dt>Email</dt><dd id="detailEmail">—</dd></div>
+            <div><dt>Company</dt><dd id="detailCompany">—</dd></div>
+            <div class="lead-id-row" aria-hidden="true"><dt>Lead ID</dt><dd class="monospace" id="detailLeadId">Not started</dd></div>
+            <div id="companySizeRow" hidden><dt>Company size</dt><dd id="detailCompanySize">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="side-card panel">
+          <div class="card-heading">
+            <span class="card-icon assessment-icon" aria-hidden="true">◈</span>
+            <div><h2>Agent Assessment</h2></div>
+          </div>
+          <div class="assessment-list">
+            <div class="assessment-row status-row"><span>Lead status</span><span class="status-badge status-neutral" id="assessmentStatus">Not assessed</span></div>
+            <div class="assessment-row"><span>Intent</span><strong id="assessmentIntent">—</strong></div>
+            <div class="assessment-row"><span>Requirements</span><strong id="assessmentRequirements">—</strong></div>
+            <div class="assessment-row"><span>Current solution</span><strong id="assessmentSolution">—</strong></div>
+            <div class="assessment-row"><span>Next action</span><strong id="assessmentAction">—</strong></div>
+            <div class="assessment-row confidence-row"><span>Confidence</span><div class="confidence-value"><div class="confidence-track"><span id="confidenceBar"></span></div><strong id="assessmentConfidence">—</strong></div></div>
+            <div class="reason-block"><span>Qualification reason</span><p id="assessmentReason">An assessment will appear after your first message.</p></div>
+          </div>
+        </section>
+
+        <section class="side-card panel tools-card">
+          <div class="card-heading">
+            <span class="card-icon tools-icon" aria-hidden="true">⌘</span>
+            <div><h2>MCP Tools Used</h2></div>
+          </div>
+          <div class="tool-list" id="toolList"><p class="muted-empty">Tools will appear here when the agent takes action.</p></div>
+          <div class="mcp-caption"><span class="mcp-dot"></span>Connected through Model Context Protocol</div>
+        </section>
+      </aside>
+    </main>
+  </div>
+</body>
+</html>

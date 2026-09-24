@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+mcp<2
+langchain-core
+langchain-openai
+langchain-groq
+langgraph
+pytest
+httpx
